@@ -1,0 +1,27 @@
+{
+  "name": "strava-proxy",
+  "version": "1.0.0",
+  "description": "A small strava proxy",
+  "main": "server.js",
+  "scripts": {
+    "docs": "apidoc -i app/routes/ -o docs/",
+  },
+  "author": "Dan Purdy",
+  "license": "MIT",
+  "dependencies": {
+    "body-parser": "^1.15.2",
+    "cors": "^2.8.1",
+    "express": "^4.14.0",
+    "helmet": "^3.1.0",
+    "morgan": "^1.7.0",
+    "rush": "0.0.2",
+    "strava-v3": "^1.14.0"
+  },
+  "devDependencies": {
+    "eslint": "^3.1.9",
+    "eslint-config-airbnb": "^15.0.0",
+    "eslint-plugin-import": "^2.7.0",
+    "eslint-plugin-jsx-a11y": "^5.1.1",
+    "eslint-plugin-react": "^7.1.0"
+  }
+}
