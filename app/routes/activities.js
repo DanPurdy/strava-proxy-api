@@ -72,9 +72,9 @@ router.get('/activities/:id', (req, res, next) => {
  * @apiParam (url) {Number} id Required. An activity ID,
  * @apiParam (url) {Number} types Optional. A stream type see <a href="https://strava.github.io/api/v3/streams/" alt="Stream Types">Stream Types</a>
  *
- * apiParam (query_params) {String} resolution=all number of data points in a stream low(100),
+ * @apiParam (query_params) {String} resolution=all number of data points in a stream low(100),
                                     medium(1000), high(10000) or all.
- * apiParam (query_params) {String} series_type see parameters at <a href="https://strava.github.io/api/v3/streams/" alt="Stream Parameters">Stream Parameters</a>
+ * @apiParam (query_params) {String} series_type see parameters at <a href="https://strava.github.io/api/v3/streams/" alt="Stream Parameters">Stream Parameters</a>
  *
  * @apiDescription returns a specified activity see <a href="https://strava.github.io/api/v3/activities/#get-details" alt="Strava Athlete API docs" target="_blank">Strava Api Docs</a>
  */
