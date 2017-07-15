@@ -54,7 +54,6 @@ router.get('/route/:id/streams', (req, res, next) => {
       return next(err);
     }
 
-    console.log(payload);
     return res.send(payload);
   });
 });

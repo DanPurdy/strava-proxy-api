@@ -88,7 +88,7 @@ router.get('/activities/:id/streams/:types', (req, res, next) => {
   if (!types) {
     return res.status(400).send({ message: 'Missing types from request' });
   }
-  console.log(resolution, series_type);
+
   return strava.streams.activity({
     id,
     types,
