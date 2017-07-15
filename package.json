@@ -4,7 +4,7 @@
   "description": "A small strava proxy",
   "main": "server.js",
   "scripts": {
-    "docs": "apidoc -i app/routes/ -o docs/",
+    "docs": "apidoc -i app/routes/ -o docs/"
   },
   "author": "Dan Purdy",
   "license": "MIT",
