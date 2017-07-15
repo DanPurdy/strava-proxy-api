@@ -4,7 +4,7 @@ const strava = require('strava-v3');
 const router = express.Router();
 
 /**
- * @api {get} /activities GET /activities
+ * @api {get} /api/activities GET /activities
  * @apiName activites
  * @apiGroup activites
  *
@@ -38,7 +38,7 @@ router.get('/activities', (req, res, next) => {
 });
 
 /**
- * @api {get} /activities/:id GET /activities/:id
+ * @api {get} /api/activities/:id GET /activities/:id
  * @apiName activity
  * @apiGroup activites
  *
@@ -65,12 +65,12 @@ router.get('/activities/:id', (req, res, next) => {
 });
 
 /**
- * @api {get} /activities/:id/streams/:type GET /activities/:id/streams/:type
+ * @api {get} /api/activities/:id/streams/:type GET /activities/:id/streams/:type
  * @apiName activity streams
  * @apiGroup activites
  *
  * @apiParam (url) {Number} id Required. An activity ID,
- * @apiParam (url) {Number} type Optional. A stream type see <a href="https://strava.github.io/api/v3/streams/" alt="Stream Types">Stream Types</a>
+ * @apiParam (url) {Number} types Optional. A stream type see <a href="https://strava.github.io/api/v3/streams/" alt="Stream Types">Stream Types</a>
  *
  * apiParam (query_params) {String} resolution=all number of data points in a stream low(100),
                                     medium(1000), high(10000) or all.
@@ -78,15 +78,20 @@ router.get('/activities/:id', (req, res, next) => {
  *
  * @apiDescription returns a specified activity see <a href="https://strava.github.io/api/v3/activities/#get-details" alt="Strava Athlete API docs" target="_blank">Strava Api Docs</a>
  */
-router.get('/activities/:id/streams/:type', (req, res, next) => {
-  const { id, type, resolution, series_type } = req.params;
+router.get('/activities/:id/streams/:types', (req, res, next) => {
+  const { id, types } = req.params;
+  const { resolution, series_type } = req.query;
   if (!id) {
-    return res.status(400).send({ message: 'Missing Activity ID' });
+    return res.status(400).send({ message: 'Missing activity id from request' });
   }
 
+  if (!types) {
+    return res.status(400).send({ message: 'Missing types from request' });
+  }
+  console.log(resolution, series_type);
   return strava.streams.activity({
     id,
-    type,
+    types,
     resolution,
     series_type,
     access_token: process.env.STRAVA_ACCESS_TOKEN,

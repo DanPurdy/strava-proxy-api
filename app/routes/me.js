@@ -4,7 +4,7 @@ const strava = require('strava-v3');
 const router = express.Router();
 
 /**
- * @api {get} /me GET /me
+ * @api {get} /api/me GET /me
  * @apiName me
  * @apiGroup me
  *
@@ -25,7 +25,7 @@ router.get('/me', (req, res, next) => {
 });
 
 /**
- * @api {get} /me/:id/stats GET /me/:id/stats
+ * @api {get} /api/me/:id/stats GET /me/:id/stats
  * @apiName me stats
  * @apiGroup me
  *
