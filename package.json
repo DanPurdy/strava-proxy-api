@@ -14,7 +14,7 @@
     "express": "^4.14.0",
     "helmet": "^3.1.0",
     "morgan": "^1.7.0",
-    "rush": "0.0.2",
+    "node-rush": "^0.1.0",
     "strava-v3": "^1.14.0"
   },
   "devDependencies": {

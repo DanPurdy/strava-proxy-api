@@ -1,5 +1,6 @@
 const express = require('express');
 const strava = require('strava-v3');
+const cache = require('../shared/cache');
 
 const router = express.Router();
 
@@ -20,20 +21,29 @@ const router = express.Router();
  * <a href="https://strava.github.io/api/v3/activities/#get-activities" alt="Strava Athlete API docs" target="_blank">Strava Api Docs</a>
  */
 router.get('/activities', (req, res, next) => {
-  // res.status(200).send({ response: 'The API is blah' });
   const { before, after, page, per_page } = req.query;
-  strava.athlete.listActivities({
-    access_token: process.env.STRAVA_ACCESS_TOKEN,
-    before,
-    after,
-    page,
-    per_page,
-  }, (err, payload) => {
+
+  const listActivities = (cb) => {
+    strava.athlete.listActivities({
+      access_token: process.env.STRAVA_ACCESS_TOKEN,
+      before,
+      after,
+      page,
+      per_page,
+    }, (err, payload) => {
+      if (err) {
+        return cb(err);
+      }
+
+      return cb(null, payload);
+    });
+  };
+
+  cache.get(req.url, listActivities, (err, response) => {
     if (err) {
       return next(err);
     }
-
-    return res.send(payload);
+    return res.send(response);
   });
 });
 
@@ -52,15 +62,25 @@ router.get('/activities/:id', (req, res, next) => {
     return res.status(400).send({ message: 'Missing Activity ID' });
   }
 
-  return strava.activities.get({
-    id,
-    access_token: process.env.STRAVA_ACCESS_TOKEN,
-  }, (err, payload) => {
+  const getActivity = (cb) => {
+    strava.activities.get({
+      id,
+      access_token: process.env.STRAVA_ACCESS_TOKEN,
+    }, (err, payload) => {
+      if (err) {
+        return cb(err);
+      }
+
+      return cb(null, payload);
+    });
+  };
+
+  return cache.get(req.url, getActivity, (err, response) => {
     if (err) {
       return next(err);
     }
 
-    return res.send(payload);
+    return res.send(response);
   });
 });
 
@@ -89,18 +109,28 @@ router.get('/activities/:id/streams/:types', (req, res, next) => {
     return res.status(400).send({ message: 'Missing types from request' });
   }
 
-  return strava.streams.activity({
-    id,
-    types,
-    resolution,
-    series_type,
-    access_token: process.env.STRAVA_ACCESS_TOKEN,
-  }, (err, payload) => {
+  const getActivityStream = (cb) => {
+    strava.streams.activity({
+      id,
+      types,
+      resolution,
+      series_type,
+      access_token: process.env.STRAVA_ACCESS_TOKEN,
+    }, (err, payload) => {
+      if (err) {
+        return cb(err);
+      }
+
+      return cb(null, payload);
+    });
+  };
+
+  return cache.get(req.url, getActivityStream, (err, response) => {
     if (err) {
       return next(err);
     }
 
-    return res.send(payload);
+    return res.send(response);
   });
 });
 

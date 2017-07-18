@@ -1,5 +1,6 @@
 const express = require('express');
 const strava = require('strava-v3');
+const cache = require('../shared/cache');
 
 const router = express.Router();
 
@@ -18,15 +19,25 @@ router.get('/route/:id', (req, res, next) => {
     return res.status(400).send({ message: 'Missing Route ID' });
   }
 
-  return strava.routes.get({
-    id,
-    access_token: process.env.STRAVA_ACCESS_TOKEN,
-  }, (err, payload) => {
+  const getRoute = (cb) => {
+    strava.routes.get({
+      id,
+      access_token: process.env.STRAVA_ACCESS_TOKEN,
+    }, (err, payload) => {
+      if (err) {
+        return cb(err);
+      }
+
+      return cb(null, payload);
+    });
+  };
+
+  return cache.get(req.url, getRoute, (err, response) => {
     if (err) {
       return next(err);
     }
 
-    return res.send(payload);
+    return res.send(response);
   });
 });
 
@@ -45,16 +56,26 @@ router.get('/route/:id/streams', (req, res, next) => {
     return res.status(400).send({ message: 'Missing Activity ID' });
   }
 
-  return strava.streams.route({
-    id,
-    types: 'latlng', // Not necessary but a bug in the strava wrapper
-    access_token: process.env.STRAVA_ACCESS_TOKEN,
-  }, (err, payload) => {
+  const getRouteStreams = (cb) => {
+    strava.streams.route({
+      id,
+      types: 'latlng', // Not necessary but a bug in the strava wrapper
+      access_token: process.env.STRAVA_ACCESS_TOKEN,
+    }, (err, payload) => {
+      if (err) {
+        return cb(err);
+      }
+
+      return cb(null, payload);
+    });
+  };
+
+  return cache.get(req.url, getRouteStreams, (err, response) => {
     if (err) {
       return next(err);
     }
 
-    return res.send(payload);
+    return res.send(response);
   });
 });
 

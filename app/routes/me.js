@@ -1,6 +1,8 @@
 const express = require('express');
 const strava = require('strava-v3');
 
+const cache = require('../shared/cache');
+
 const router = express.Router();
 
 /**
@@ -14,13 +16,22 @@ const router = express.Router();
  *
  */
 router.get('/me', (req, res, next) => {
-  // res.status(200).send({ response: 'The API is blah' });
-  strava.athlete.get({ access_token: process.env.STRAVA_ACCESS_TOKEN }, (err, payload) => {
+  const getMe = (cb) => {
+    strava.athlete.get({ access_token: process.env.STRAVA_ACCESS_TOKEN }, (err, payload) => {
+      if (err) {
+        return cb(err);
+      }
+
+      return cb(null, payload);
+    });
+  };
+
+  return cache.get(req.url, getMe, (err, response) => {
     if (err) {
       return next(err);
     }
 
-    return res.send(payload);
+    return res.send(response);
   });
 });
 
@@ -38,38 +49,56 @@ router.get('/me/:id/stats', (req, res, next) => {
 
   // If no athlete ID specified then get the currently active athlete and then GET their stats
   if (!id) {
-    return strava.athlete.get({ access_token: process.env.STRAVA_ACCESS_TOKEN }, (err, payload) => {
+    const getStatsWithoutId = cb => strava.athlete.get({ access_token: process.env.STRAVA_ACCESS_TOKEN }, (err, payload) => {
       if (err) {
-        return next(err);
+        return cb(err);
       }
 
       if (!payload.id) {
-        return next(new Error('No Athlete ID received from Strava'));
+        return cb(new Error('No Athlete ID received from Strava'));
       }
 
-      return strava.athletes.stats({
+      strava.athletes.stats({
         id: payload.id,
         access_token: process.env.STRAVA_ACCESS_TOKEN,
       }, (statErr, statPayload) => {
         if (statErr) {
-          return next(statErr);
+          return cb(statErr);
         }
 
-        return res.send(statPayload);
+        return cb(null, statPayload);
       });
+    });
+
+    return cache.get(req.url, getStatsWithoutId, (err, response) => {
+      if (err) {
+        return next(err);
+      }
+
+      return res.send(response);
     });
   }
 
   // If an ID is provided let's just get their stats
-  return strava.athletes.stats({
-    id,
-    access_token: process.env.STRAVA_ACCESS_TOKEN,
-  }, (err, payload) => {
+  const getStatsWithId = (cb) => {
+    strava.athletes.stats({
+      id,
+      access_token: process.env.STRAVA_ACCESS_TOKEN,
+    }, (err, payload) => {
+      if (err) {
+        return cb(err);
+      }
+
+      return cb(null, payload);
+    });
+  };
+
+  return cache.get(req.url, getStatsWithId, (err, response) => {
     if (err) {
       return next(err);
     }
 
-    return res.send(payload);
+    return res.send(response);
   });
 });
 
