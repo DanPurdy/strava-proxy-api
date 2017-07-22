@@ -1,6 +1,7 @@
 const express = require('express');
 const fs = require('fs');
 const bodyParser = require('body-parser');
+const cors = require('cors');
 const helmet = require('helmet');
 const morgan = require('morgan');
 const index = require('./app/routes/index');
@@ -16,8 +17,22 @@ const securityOptions = {
   requestCert: false,
 };
 
+const whitelist = process.env.CORS_WHITELIST && process.env.CORS_WHITELIST.split(' ');
+const corsOptions = {
+  origin: whitelist ? (origin, cb) => {
+    if (whitelist.indexOf(origin) !== -1) {
+      cb(null, true);
+    } else {
+      cb(new Error('Not allowed by CORS'));
+    }
+  } : 'http://localhost:3000',
+  optionsSuccessStatus: 200, // some legacy browsers (IE11, various SmartTVs) choke on 204
+};
+
 const secureServer = require('https').createServer(securityOptions, app);
 
+app.use(cors(corsOptions));
+app.use(helmet());
 
 // get our request parameters
 app.use(bodyParser.urlencoded({
@@ -36,8 +51,6 @@ app.get('/', (req, res) => {
 
 app.use('/docs', express.static('docs'));
 
-
-app.use(helmet());
 app.use('/api', [
   index,
   me,
