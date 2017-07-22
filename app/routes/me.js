@@ -40,6 +40,8 @@ router.get('/me', (req, res, next) => {
  * @apiName me stats
  * @apiGroup me
  *
+ * @apiParam {Number} id Required. An activity ID
+ *
  * @apiDescription returns the athlete stats for the current authenticated athlete see
  * <a href="https://strava.github.io/api/v3/athlete/#stats" alt="Strava Athlete API docs" target="_blank">Strava Api Docs</a>
  *
@@ -47,39 +49,6 @@ router.get('/me', (req, res, next) => {
 router.get('/me/:id/stats', (req, res, next) => {
   const { id } = req.params;
 
-  // If no athlete ID specified then get the currently active athlete and then GET their stats
-  if (!id) {
-    const getStatsWithoutId = cb => strava.athlete.get({ access_token: process.env.STRAVA_ACCESS_TOKEN }, (err, payload) => {
-      if (err) {
-        return cb(err);
-      }
-
-      if (!payload.id) {
-        return cb(new Error('No Athlete ID received from Strava'));
-      }
-
-      strava.athletes.stats({
-        id: payload.id,
-        access_token: process.env.STRAVA_ACCESS_TOKEN,
-      }, (statErr, statPayload) => {
-        if (statErr) {
-          return cb(statErr);
-        }
-
-        return cb(null, statPayload);
-      });
-    });
-
-    return cache.get(req.url, getStatsWithoutId, (err, response) => {
-      if (err) {
-        return next(err);
-      }
-
-      return res.send(response);
-    });
-  }
-
-  // If an ID is provided let's just get their stats
   const getStatsWithId = (cb) => {
     strava.athletes.stats({
       id,
@@ -94,6 +63,49 @@ router.get('/me/:id/stats', (req, res, next) => {
   };
 
   return cache.get(req.url, getStatsWithId, (err, response) => {
+    if (err) {
+      return next(err);
+    }
+
+    return res.send(response);
+  });
+});
+
+
+/**
+ * @api {get} /api/me//stats GET /me/:id/stats
+ * @apiName me stats
+ * @apiGroup me
+ *
+ * @apiDescription returns the athlete stats for the current authenticated athlete see
+ * <a href="https://strava.github.io/api/v3/athlete/#stats" alt="Strava Athlete API docs" target="_blank">Strava Api Docs</a>
+ *
+ */
+router.get('/me/stats', (req, res, next) => {
+  const getStatsWithoutId = cb => strava.athlete.get({
+    access_token: process.env.STRAVA_ACCESS_TOKEN,
+  }, (err, payload) => {
+    if (err) {
+      return cb(err);
+    }
+
+    if (!payload.id) {
+      return cb(new Error('No Athlete ID received from Strava'));
+    }
+
+    return strava.athletes.stats({
+      id: payload.id,
+      access_token: process.env.STRAVA_ACCESS_TOKEN,
+    }, (statErr, statPayload) => {
+      if (statErr) {
+        return cb(statErr);
+      }
+
+      return cb(null, statPayload);
+    });
+  });
+
+  return cache.get(req.url, getStatsWithoutId, (err, response) => {
     if (err) {
       return next(err);
     }
